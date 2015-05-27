@@ -33,6 +33,8 @@ module Traject
 
       @batched_queue         = Queue.new
       @thread_pool = Traject::ThreadPool.new(@thread_pool_size)
+
+      @after_send_batch_callbacks = []
     end
 
     # Get the logger from the settings, or default to an effectively null logger
@@ -79,6 +81,10 @@ module Traject
       list_of_arrays = hashes_to_arrays(@column_names, batch.collect {|context| context.output_hash})
 
       db_table.import @column_names, list_of_arrays
+
+      @after_send_batch_callbacks.each do |callback|
+        callback.call(batch, self)
+      end
     end
 
     # Turn an array of hashes into an array of arrays,
@@ -95,6 +101,9 @@ module Traject
       end
     end
 
+    def after_send_batch(&block)
+      @after_send_batch_callbacks << block
+    end
 
   end
 end
