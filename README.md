@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/traject/traject_sequel_writer.svg)](https://travis-ci.org/traject/traject_sequel_writer)
+
 # TrajectSequelWriter
 
 IN PROGRESS
