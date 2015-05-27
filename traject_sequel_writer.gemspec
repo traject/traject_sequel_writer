@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["jonathan@dnil.net"]
 
   spec.summary       = %q{Plug-in for traject, write to an rdbms with Sequel gem}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage      = "https://github.com/traject/traject_sequel_writer"
   spec.license       = "MIT"
 
 
