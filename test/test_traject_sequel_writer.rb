@@ -45,10 +45,8 @@ describe "Traject::SequelWriter" do
     end
 
     it "sets created_at" do
-      skip
-
       @writer.db_table.each do |hash|
-        assert_kind_of DateTime, hash[:created_at]
+        assert_kind_of Time, hash[:created_at]
       end
     end
 
