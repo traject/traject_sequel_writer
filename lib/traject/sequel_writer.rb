@@ -34,7 +34,7 @@ module Traject
       @batched_queue         = Queue.new
       @thread_pool = Traject::ThreadPool.new(@thread_pool_size)
 
-      @after_send_batch_callbacks = []
+      @after_send_batch_callbacks = Array(@settings["sequel_writer.after_send_batch"] || [])
     end
 
     # Get the logger from the settings, or default to an effectively null logger

@@ -40,7 +40,7 @@ describe "Traject::SequelWriter" do
       @received_in_batches = Queue.new
 
       @writer.after_send_batch do |batch, writer|
-        assert_kind_of Traject::SequelWriter, writer, "second arg is not a Traject::SequelWriter" 
+        assert_kind_of Traject::SequelWriter, writer
         assert_kind_of Array, batch       
 
         batch.each {|c| @received_in_batches.push c }
