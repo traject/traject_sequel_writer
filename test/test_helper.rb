@@ -10,7 +10,15 @@ require 'sequel'
 # Create a temporary sqlite db for tests, remove it when we're done
 require 'fileutils'
 FileUtils::mkdir_p 'tmp'
-db = Sequel.connect("sqlite://tmp/testing.sqlite")
+
+
+TEST_SEQUEL_CONNECT_STR = if defined? JRuby
+  "jdbc:sqlite:tmp/testing.sqlite"
+else
+  "sqlite://tmp/testing.sqlite"
+end
+
+db = Sequel.connect(TEST_SEQUEL_CONNECT_STR)
 db.drop_table?(:test)
 db.create_table(:test) do
   primary_key :id
@@ -21,6 +29,7 @@ db.create_table(:test) do
   TrueClass :boolean_a
   Integer   :int_a
 end
+
 db[:test].delete
 # Disconnect it now, make the code do the work
 db.disconnect

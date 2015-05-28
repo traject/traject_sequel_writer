@@ -79,7 +79,7 @@ describe "Traject::SequelWriter" do
   end
 
   def writer(args = {})
-    args = {"sequel_writer.connection_string" => "sqlite://tmp/testing.sqlite",
+    args = {"sequel_writer.connection_string" => TEST_SEQUEL_CONNECT_STR,
         "sequel_writer.table_name" => "test",
         "sequel_writer.batch_size" => 5}.merge(args)
     return Traject::SequelWriter.new(args)
