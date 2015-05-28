@@ -19,13 +19,18 @@ module Traject
       @sequel_db = Sequel.connect(@settings["sequel_writer.connection_string"])
       @db_table  = @sequel_db[  @settings["sequel_writer.table_name"].to_sym ]
 
-      @pk_column = (@settings["sequel_writer.pk_column"] || (
-        # use Sequel schema lookup
-        (@sequel_db.schema( @db_table.first_source_table ).find {|column, info| info[:primary_key] == true}).first
-      )).to_sym
 
-      @column_names      = (@settings["sequel_writer.columns"] || (@db_table.columns - [@pk_column])).collect {|c| c.to_sym}
+      # Which keys to send to columns? Can be set explicitly with sequel_writer.columns,
+      # or we'll use all non-PK columns introspected from the db schema. 
+      @column_names      = @settings["sequel_writer.columns"]
+      unless @column_names
+        @column_names = @sequel_db.schema( @db_table.first_source_table ).find_all do |column, info|
+          info[:primary_key] != true
+        end.collect {|pair| pair.first}
+      end
+      @column_names = @column_names.collect {|c| c.to_sym}
 
+      
       # How many threads to use for the writer?
       # if our thread pool settings are 0, it'll just create a null threadpool that
       # executes in calling context. Default to 1, for waiting on DB I/O. 
