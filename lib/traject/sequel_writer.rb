@@ -15,6 +15,9 @@ module Traject
     def initialize(argSettings)
       @settings = Traject::Indexer::Settings.new(argSettings)
 
+      unless @settings["sequel_writer.connection_string"] && @settings["sequel_writer.table_name"]
+        raise ArgumentError, "settings `sequel_writer.connection_string` and `sequel_writer.table_name` are required"
+      end
 
       @sequel_db = Sequel.connect(@settings["sequel_writer.connection_string"])
       @db_table  = @sequel_db[  @settings["sequel_writer.table_name"].to_sym ]

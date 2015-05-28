@@ -54,6 +54,14 @@ describe "Traject::SequelWriter" do
     end
   end
 
+  describe "errors" do
+    it "raises without required settings" do
+      assert_raises(ArgumentError) { Traject::SequelWriter.new }
+      assert_raises(ArgumentError) { Traject::SequelWriter.new("sequel_writer.connect_string" => "foo") }
+      assert_raises(ArgumentError) { Traject::SequelWriter.new("sequel_writer.table_name" => "foo") }
+    end
+  end
+
 
   # Helpers
 
