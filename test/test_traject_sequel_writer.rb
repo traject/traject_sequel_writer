@@ -25,12 +25,6 @@ describe "Traject::SequelWriter" do
       end
 
     end
-
-    it "sets created_at" do
-      @writer.db_table.each do |hash|
-        assert_kind_of Time, hash[:created_at]
-      end
-    end
   end
 
   describe "after_send_batch" do

@@ -22,7 +22,6 @@ module Traject
       @pk_column = (@settings["sequel_writer.pk_column"] || :id).to_sym
 
       @column_names      = (@settings["sequel_writer.columns"] || (@db_table.columns - [@pk_column])).collect {|c| c.to_sym}
-      @created_at_column = @settings["sequel_writer.created_at_column"] || (@column_names.include?(:created_at) ? :created_at : false)
 
       # How many threads to use for the writer?
       # if our thread pool settings are 0, it'll just create a null threadpool that
@@ -91,13 +90,7 @@ module Traject
     # with each array being a hashes values matching column_names, in that order
     def hashes_to_arrays(column_names, list_of_hashes)
       list_of_hashes.collect do |h| 
-        column_names.collect do |c| 
-          if c == @created_at_column && (! h.has_key?(c.to_s))
-            Time.now
-          else
-            h[c.to_s]
-          end
-        end
+        column_names.collect {|c| h[c.to_s] }
       end
     end
 
