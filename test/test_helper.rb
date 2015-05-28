@@ -12,7 +12,7 @@ require 'fileutils'
 FileUtils::mkdir_p 'tmp'
 
 
-TEST_SEQUEL_CONNECT_STR = if defined? JRuby
+TEST_SEQUEL_CONNECT_STR = if defined? JRUBY_VERSION
   "jdbc:sqlite:tmp/testing.sqlite"
 else
   "sqlite://tmp/testing.sqlite"
