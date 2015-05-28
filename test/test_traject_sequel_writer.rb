@@ -61,6 +61,7 @@ describe "Traject::SequelWriter" do
     (1..num).each do |i|
         context = Traject::Indexer::Context.new
         context.output_hash.merge!(
+          "id" => "ignore_me", # should ignore pk by default
           "string_a" => "String_a #{i}",
           "string_b" => "String_b #{i}",
           "no_such_column" => "ignore me",
