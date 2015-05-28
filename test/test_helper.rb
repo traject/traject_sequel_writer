@@ -36,6 +36,6 @@ db.disconnect
 
 
 
-MiniTest::Unit.after_tests do 
+MiniTest.after_run do 
   File.unlink("tmp/testing.sqlite")
 end
