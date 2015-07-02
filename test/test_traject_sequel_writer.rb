@@ -23,8 +23,29 @@ describe "Traject::SequelWriter" do
         assert_includes [true, false], hash[:boolean_a], "boolean_a is not true or false for #{hash}"
         assert_kind_of Integer, hash[:int_a]
       end
-
     end
+  end
+
+
+  it "writes with sequel.database parameter instead of connection_str" do
+    sequel_db = Sequel.connect(TEST_SEQUEL_CONNECT_STR)
+
+    writer = writer("sequel_writer.connection_string" => nil, 
+      "sequel_writer.database" => sequel_db)
+
+    write_mock_docs(writer, 63)
+
+    assert_equal 63, writer.db_table.count
+
+    writer.db_table.each do |hash|
+      assert_kind_of String, hash[:string_a], "string_a is not filled out for #{hash}"
+      assert_kind_of String, hash[:string_b], "string_b is not filled out for #{hash}"
+      assert_nil hash[:string_c]
+      assert_includes [true, false], hash[:boolean_a], "boolean_a is not true or false for #{hash}"
+      assert_kind_of Integer, hash[:int_a]
+    end
+
+    writer.db_table.delete
   end
 
   describe "after_send_batch" do
