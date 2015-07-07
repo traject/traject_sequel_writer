@@ -4,6 +4,8 @@ require 'traject/indexer/settings'
 
 require 'sequel'
 
+require 'thread'
+
 module Traject
   class SequelWriter
     # Sequel db connection object
@@ -29,12 +31,14 @@ module Traject
       # Which keys to send to columns? Can be set explicitly with sequel_writer.columns,
       # or we'll use all non-PK columns introspected from the db schema. 
       @column_names      = @settings["sequel_writer.columns"]
+
       unless @column_names
         @column_names = @sequel_db.schema( @db_table.first_source_table ).find_all do |column, info|
           info[:primary_key] != true
         end.collect {|pair| pair.first}
       end
       @column_names = @column_names.collect {|c| c.to_sym}
+      @column_names = @column_names.freeze
 
       
       # How many threads to use for the writer?
@@ -72,7 +76,7 @@ module Traject
       # consistency, and to ensure expected order of operations, so
       # it goes to the end of the queue behind any other work.
       batch = Traject::Util.drain_queue(@batched_queue)
-      @thread_pool.maybe_in_thread_pool { send_batch(batch) }
+      @thread_pool.maybe_in_thread_pool(batch) {|batch_arg| send_batch(batch_arg) }
       
 
       # Wait for shutdown, and time it.
@@ -93,19 +97,41 @@ module Traject
     def send_batch(batch)
       list_of_arrays = hashes_to_arrays(@column_names, batch.collect {|context| context.output_hash})
 
-      db_table.import @column_names, list_of_arrays
+      begin
+        db_table.import @column_names, list_of_arrays
+      rescue Sequel::DatabaseError, Sequel::PoolTimeout => batch_exception
+        # We rescue PoolTimeout too, because we're mysteriously getting those, they are maybe dropped DB connections?
+        # Try them each one by one, mostly so we can get a reasonable error message with particular record. 
+        logger.warn("SequelWriter: error (#{batch_exception}) inserting batch of #{list_of_arrays.count} starting from system_id #{batch.first.output_hash['system_id']}, retrying individually...")
+        
+        batch.each do |context|
+          send_single(context)
+        end
+      end
 
       @after_send_batch_callbacks.each do |callback|
         callback.call(batch, self)
       end
     end
 
+    def send_single(context)      
+      db_table.insert @column_names, hash_to_array(@column_names, context.output_hash)
+    rescue Sequel::DatabaseError => e
+      logger.error("SequelWriter: Could not insert row: #{context.output_hash}: #{e}")
+      raise e
+    end
+
+
     # Turn an array of hashes into an array of arrays,
     # with each array being a hashes values matching column_names, in that order
     def hashes_to_arrays(column_names, list_of_hashes)
       list_of_hashes.collect do |h| 
-        column_names.collect {|c| h[c.to_s] }
+        hash_to_array(column_names, h)
       end
+    end
+
+    def hash_to_array(column_names, hash)
+      column_names.collect {|c| hash[c.to_s]}
     end
 
     def after_send_batch(&block)
