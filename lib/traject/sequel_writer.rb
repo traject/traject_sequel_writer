@@ -24,7 +24,13 @@ module Traject
         raise ArgumentError, "setting `sequel_writer.table_name` is required"
       end
 
-      @sequel_db = @settings["sequel_writer.database"] || Sequel.connect(@settings["sequel_writer.connection_string"])
+      @disconnect_on_close = true
+      @sequel_db = @settings["sequel_writer.database"]
+      unless @sequel_db
+        @sequel_db = Sequel.connect(@settings["sequel_writer.connection_string"])
+        @disconnect_on_close = false
+      end
+
       @db_table  = @sequel_db[  @settings["sequel_writer.table_name"].to_sym ]
 
 
@@ -91,7 +97,7 @@ module Traject
       # that didn't show up before.
       @thread_pool.raise_collected_exception!
 
-      @sequel_db.disconnect
+      @sequel_db.disconnect if @disconnect_on_close
     end
 
     def send_batch(batch)
