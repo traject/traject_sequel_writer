@@ -140,10 +140,32 @@ module Traject
 
     def hash_to_array(column_names, hash)
       column_names.collect do |c| 
-        v = hash[c.to_s]
-        v.kind_of?(Array) ? v.join(@internal_delimiter) : v
+        output_value_to_column_value(hash[c.to_s])
       end
     end
+
+    # Traject context.output_hash values are arrays.
+    # turn them into good column values, joining strings if needed. 
+    #
+    # Single values also accepted, even though not traject standard, they
+    # will be passed through unchanged. 
+    def output_value_to_column_value(v)
+      if v.kind_of?(Array)
+        if v.length == 0
+          nil
+        elsif v.length == 1
+          v.first
+        elsif v.first.kind_of?(String)
+          v.join(@internal_delimiter)
+        else
+          # Not a string? Um, raise for now?
+          raise ArgumentError.new("Traject::SequelWriter, multiple non-String values provided: #{v}")
+        end
+      else
+        v
+      end
+    end
+
 
     def after_send_batch(&block)
       @after_send_batch_callbacks << block
