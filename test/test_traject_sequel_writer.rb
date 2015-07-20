@@ -41,6 +41,19 @@ describe "Traject::SequelWriter" do
       assert @writer.db_table.where(:string_a => "String_One,String_Two", :string_b => "String_B_One").count == 1, "Expected written row with expected values"
     end
 
+    it "complains about multiple non-string values" do
+      @writer = self.writer
+
+      context = Traject::Indexer::Context.new
+      context.output_hash.merge!(
+        "int_a" => [1001, 1002]
+      )
+      assert_raises(ArgumentError) do
+        @writer.put context  
+        @writer.close
+      end
+    end
+
     after do
       @writer.db_table.delete
     end
