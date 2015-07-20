@@ -9,6 +9,7 @@ The writer can be used as standard, as the destination of your indexing pipeline
 
 It was actually written for a use case where it's used as a "side effect" in a traject `each_record`, writing different data out to an rdbms on the side, while the main indexing is to Solr. This ends up a bit hacky at present but works.  
 
+Currently has a pre-1.0 release number, as it has not seen wide use, and may have some oddities. 
 
 ## Installation
 
