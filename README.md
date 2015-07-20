@@ -58,6 +58,12 @@ Still, your Context output_hash's must provide output key/values for every colum
 null will be inserted for that column. Keys in the output_hash that don't match output columns
 will be ignored. 
 
+Note that traject output_hash's have values that are arrays of potentially multiple values. If
+multiple values are present, they will be joined with a comma or with set `sequel_writer.internal_delimiter`. 
+For non-string type db fields, this will probably raise. 
+`traject_sequel_writer` also accepts single values in output_hash as an alternative, which isn't really traject's
+API, but experimenting to see if it's helpful rather than confusing to accept this alternate too. 
+ 
 ### All settings
 
 * `sequel_writer.connection_string` : [Sequel connection string](http://sequel.jeremyevans.net/rdoc/files/doc/opening_databases_rdoc.html)
@@ -67,6 +73,7 @@ will be ignored.
   column_names not present in the Traject::Context#output_hash will end up with SQL `null` inserted. 
 * `sequel_writer.thread_pool_size` Number of threads to use for writing to DB. Default 1, should be good. 
 * `sequel_writer.batch_size` Count of records to batch together in a single multi-row SQL `INSERT`. Default 100. Should be good. 
+* `sequel_writer.internal_delimiter` -- Delimiter _within_ a field, for multiple values. Default is comma.
 
 ### Using as a side-channel additional output 
 

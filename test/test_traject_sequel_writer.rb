@@ -26,6 +26,26 @@ describe "Traject::SequelWriter" do
     end
   end
 
+  describe "with multiple values" do
+    it "joins multiple string values" do
+      @writer = self.writer
+
+      context = Traject::Indexer::Context.new
+      context.output_hash.merge!(
+        "string_a" => ["String_One", "String_Two"],
+        "string_b" => ["String_B_One"]
+      )
+      @writer.put context  
+      @writer.close
+
+      assert @writer.db_table.where(:string_a => "String_One,String_Two", :string_b => "String_B_One").count == 1, "Expected written row with expected values"
+    end
+
+    after do
+      @writer.db_table.delete
+    end
+  end
+
 
   it "writes with sequel.database parameter instead of connection_str" do
     sequel_db = Sequel.connect(TEST_SEQUEL_CONNECT_STR)
@@ -90,12 +110,12 @@ describe "Traject::SequelWriter" do
     (1..num).each do |i|
         context = Traject::Indexer::Context.new
         context.output_hash.merge!(
-          "id" => "ignore_me", # should ignore pk by default
-          "string_a" => "String_a #{i}",
-          "string_b" => "String_b #{i}",
-          "no_such_column" => "ignore me",
-          "boolean_a" => (i % 2 == 0) ? true : false,
-          "int_a" => i
+          "id" => ["ignore_me"], # should ignore pk by default
+          "string_a" => ["String_a #{i}"],
+          "string_b" => ["String_b #{i}"],
+          "no_such_column" => ["ignore me"],
+          "boolean_a" => [(i % 2 == 0) ? true : false],
+          "int_a" => [i]
         )
         writer.put context
       end

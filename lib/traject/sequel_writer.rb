@@ -58,6 +58,8 @@ module Traject
       @thread_pool = Traject::ThreadPool.new(@thread_pool_size)
 
       @after_send_batch_callbacks = Array(@settings["sequel_writer.after_send_batch"] || [])
+
+      @internal_delimiter = @settings["sequel_writer.internal_delimiter"] || ","
     end
 
     # Get the logger from the settings, or default to an effectively null logger
@@ -137,7 +139,10 @@ module Traject
     end
 
     def hash_to_array(column_names, hash)
-      column_names.collect {|c| hash[c.to_s]}
+      column_names.collect do |c| 
+        v = hash[c.to_s]
+        v.kind_of?(Array) ? v.join(@internal_delimiter) : v
+      end
     end
 
     def after_send_batch(&block)
