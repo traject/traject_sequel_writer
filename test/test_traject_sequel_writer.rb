@@ -46,6 +46,36 @@ describe "Traject::SequelWriter" do
     end
   end
 
+  describe "with only single values in output hash" do
+    # not really traject API, but we allow it anyway. 
+    it "still writes" do
+     @writer = self.writer
+
+      context = Traject::Indexer::Context.new
+      context.output_hash.merge!(
+        "id" => "ignore_me", # should ignore pk by default
+        "string_a" => "String_a",
+        "string_b" => "String_b",
+        "no_such_column" => "ignore me",
+        "boolean_a" => true,
+        "int_a" => 1001
+      )
+      @writer.put context  
+      @writer.close
+
+      row = @writer.db_table.first
+
+      assert_equal "String_a", row[:string_a]
+      assert_equal "String_b", row[:string_b]
+      assert_equal true, row[:boolean_a]
+      assert_equal 1001, row[:int_a]
+    end
+
+    after do
+      @writer.db_table.delete
+    end
+  end
+
 
   it "writes with sequel.database parameter instead of connection_str" do
     sequel_db = Sequel.connect(TEST_SEQUEL_CONNECT_STR)
