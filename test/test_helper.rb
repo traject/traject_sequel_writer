@@ -1,9 +1,8 @@
+require 'minitest'
 require 'minitest/autorun'
 require 'minitest/spec'
 
 require 'traject_sequel_writer'
-
-require 'minitest/autorun'
 
 require 'sequel'
 
